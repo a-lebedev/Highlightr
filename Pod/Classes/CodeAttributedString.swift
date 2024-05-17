@@ -53,7 +53,7 @@ open class CodeAttributedString : NSTextStorage
      - parameter highlightr: The highlightr instance to use. Defaults to `Highlightr()`.
 
      */
-    public init(highlightr: Highlightr = Highlightr()!)
+    public init(highlightr: Highlightr = HighlightrFactory().makeParser()!)
     {
         self.highlightr = highlightr
         super.init()
@@ -62,7 +62,7 @@ open class CodeAttributedString : NSTextStorage
 
     /// Initialize the CodeAttributedString
     public override init() {
-        self.highlightr = Highlightr()!
+        self.highlightr = HighlightrFactory().makeParser()!
         super.init()
         setupListeners()
     }
@@ -70,7 +70,7 @@ open class CodeAttributedString : NSTextStorage
     /// Initialize the CodeAttributedString
     required public init?(coder aDecoder: NSCoder)
     {
-        self.highlightr = Highlightr()!
+        self.highlightr = HighlightrFactory().makeParser()!
         super.init(coder: aDecoder)
         setupListeners()
     }
@@ -79,7 +79,7 @@ open class CodeAttributedString : NSTextStorage
     /// Initialize the CodeAttributedString
     required public init?(pasteboardPropertyList propertyList: Any, ofType type: NSPasteboard.PasteboardType)
     {
-        self.highlightr = Highlightr()!
+        self.highlightr = HighlightrFactory().makeParser()!
         super.init(pasteboardPropertyList: propertyList, ofType: type)
         setupListeners()
     }

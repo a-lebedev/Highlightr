@@ -32,14 +32,14 @@ open class Highlightr
     open var ignoreIllegals = false
 
     private let hljs: JSValue
-
+    private let jsContext: JSContext
     private let bundle : Bundle
     private let htmlStart = "<"
     private let spanStart = "span class=\""
     private let spanStartClose = "\">"
     private let spanEnd = "/span>"
     private let htmlEscape = try! NSRegularExpression(pattern: "&#?[a-zA-Z0-9]+?;", options: .caseInsensitive)
-    
+
     /**
      Default init method.
 
@@ -47,42 +47,26 @@ open class Highlightr
 
      - returns: Highlightr instance.
      */
-    public init?(highlightPath: String? = nil)
-    {
-        let jsContext = JSContext()!
+    public init?(hgJs: String = "", bundle: Bundle = .main, themeName: String = "pojoaque") {
+        self.bundle = bundle
+        self.jsContext = JSContext()
         let window = JSValue(newObjectIn: jsContext)
         jsContext.setObject(window, forKeyedSubscript: "window" as NSString)
-
-        #if SWIFT_PACKAGE
-        let bundle = Bundle.module
-        #else
-        let bundle = Bundle(for: Highlightr.self)
-        #endif
-        self.bundle = bundle
-        guard let hgPath = highlightPath ?? bundle.path(forResource: "highlight.min", ofType: "js") else
-        {
-            return nil
-        }
-        
-        let hgJs = try! String.init(contentsOfFile: hgPath)
         let value = jsContext.evaluateScript(hgJs)
-        if value?.toBool() != true
-        {
-            return nil
-        }
-        guard let hljs = window?.objectForKeyedSubscript("hljs") else
-        {
+        guard
+            value?.toBool() == true,
+            let hljs = window?.objectForKeyedSubscript("hljs")
+        else {
             return nil
         }
         self.hljs = hljs
-        
-        guard setTheme(to: "pojoaque") else
-        {
-            return nil
-        }
-        
+        setTheme(to: themeName)
     }
-    
+
+  deinit {
+    jsContext.flush()
+  }
+
     /**
      Set the theme to use for highlighting.
      
@@ -267,4 +251,11 @@ open class Highlightr
         return resultString
     }
     
+}
+
+extension JSContext {
+  func flush() {
+   let ref = self.jsGlobalContextRef
+   JSGarbageCollect(ref)
+  }
 }
