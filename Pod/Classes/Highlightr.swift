@@ -97,7 +97,15 @@ open class Highlightr
      
      - returns: NSAttributedString with the detected code highlighted.
      */
-    open func highlight(_ code: String, as languageName: String? = nil, fastRender: Bool = true) -> NSAttributedString?
+    open func highlight(_ code: String, as languageName: String? = nil, fastRender: Bool = true) -> NSAttributedString? {
+        // NB: @Andrew. This part with making attributed string, should be covered with `autoreleasepool`
+        // cause a lot of objects that clogging up the memory are created during this procedure
+        autoreleasepool {
+            internalHighlight(code, as: languageName, fastRender: fastRender)
+        }
+    }
+
+    private func internalHighlight(_ code: String, as languageName: String? = nil, fastRender: Bool = true) -> NSAttributedString?
     {
         let ret: JSValue
         if let languageName = languageName
